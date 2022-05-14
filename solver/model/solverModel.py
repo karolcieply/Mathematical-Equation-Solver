@@ -31,7 +31,7 @@ class SolverModel:
     def createModel(self, k: int = 5, knnP: int = 2) -> None:
         self.__created = True
         self.__clf = KNeighborsClassifier(n_neighbors=k, p=knnP)
-        logging.info(f"Model Created")
+        logging.info("Model Created")
 
     def predict(self, data: List[float]) -> str:
         if not self.__fitted:
