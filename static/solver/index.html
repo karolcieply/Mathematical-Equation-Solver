@@ -2,5 +2,18 @@
 
 
 {% block content %}
-<h1>This is sample response</h1>
+<div class="container">
+    <h1 class="text-center">Handwritten Digit Recognition</h1>
+    <p class="text-center">Draw your digit</p>
+    <div class="d-md-flex justify-content-md-center">
+    <canvas width="280" height="280" style="border:8px solid; border-radius: 5px; cursor: crosshair;"></canvas>
+</div>
+    <div class="d-grid gap-2 d-md-flex justify-content-md-center">
+        <button type="button" class="btn btn-dark">CLEAR</button>
+        <button type="button" class="btn btn-dark">PREDICT</button>
+  </div>
+  <p class="text-center">Predicted Output:</p>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.5/dist/umd/popper.min.js" integrity="sha384-Xe+8cL9oJa6tN/veChSP7q+mnSPaj5Bcu9mPX5F5xIGE0DVittaqT5lorf0EI7Vk" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/js/bootstrap.min.js" integrity="sha384-kjU+l4N0Yf4ZOJErLsIcvOU2qSb74wXpOhqTvwVx3OElZRweTnQ6d31fXEoRD1Jy" crossorigin="anonymous"></script>
 {% endblock %}
