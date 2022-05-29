@@ -1,8 +1,10 @@
 import logging
+import pickle
 from typing import List, Tuple
 from sklearn.neighbors import KNeighborsClassifier
-import pickle
+from solver.models import Prediction
 MODEL_PATH = "solver/model/solverModel.pkl"
+
 logging.basicConfig(level=logging.INFO)
 
 
