@@ -74,19 +74,19 @@ class SolverModel:
         small_image = np.asarray(img).reshape((output_size, bin_size, output_size, bin_size, 1)).min(3).min(1)
         topredict = ((np.asarray(small_image)*-1+255)/255).reshape(1, 28*28)
         image = small_image
+        return self.__clf.predict(topredict)[0]
+
+    @staticmethod
+    def plotImage(image: np.ndarray) -> None:
         fig = plt.figure()
         plt.imshow(image,cmap='gray')
         plt.show()
-        return self.__clf.predict(topredict)[0]
-
-
+        
 # def main():
 #     sm = SolverModel()
 #     sm.createModel()
-#     # sm.fitModel()
-#     # sm.saveModel()
-#     sm.loadModel()
-#     print(sm.predictUploadedImage())
+#     sm.fitModel()
+#     sm.saveModel()
 
 
 # if __name__ == "__main__":
