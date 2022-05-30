@@ -1,12 +1,15 @@
 import logging
+import numpy as np
 import pickle
+import io
+from PIL import Image
 from typing import List, Tuple
 from sklearn.neighbors import KNeighborsClassifier
-from solver.models import Prediction
+import matplotlib.pyplot as plt
+
 MODEL_PATH = "solver/model/solverModel.pkl"
 
 logging.basicConfig(level=logging.INFO)
-
 
 class SolverModel:
     __fitted: bool = False
@@ -60,14 +63,31 @@ class SolverModel:
         X_test = X_test/255
         X_test_reshaped = X_test.reshape(len(X_test), 28*28)
         return X_train_reshaped, y_train, X_test_reshaped, y_test
+    
+    def predictUploadedImage(self, imagePath) -> int:
+        with open(imagePath, "rb") as f:
+            readBytes = f.read()
+        img = Image.open(io.BytesIO(readBytes)).convert('L')
+        input_size = 280
+        output_size = 28
+        bin_size = input_size // output_size
+        small_image = np.asarray(img).reshape((output_size, bin_size, output_size, bin_size, 1)).min(3).min(1)
+        topredict = ((np.asarray(small_image)*-1+255)/255).reshape(1, 28*28)
+        image = small_image
+        fig = plt.figure()
+        plt.imshow(image,cmap='gray')
+        plt.show()
+        return self.__clf.predict(topredict)[0]
 
 
-def main():
-    sm = SolverModel()
-    sm.createModel()
-    sm.fitModel()
-    sm.saveModel()
+# def main():
+#     sm = SolverModel()
+#     sm.createModel()
+#     # sm.fitModel()
+#     # sm.saveModel()
+#     sm.loadModel()
+#     print(sm.predictUploadedImage())
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
