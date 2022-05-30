@@ -83,10 +83,8 @@ class SolverModel:
 # def main():
 #     sm = SolverModel()
 #     sm.createModel()
-#     # sm.fitModel()
-#     # sm.saveModel()
-#     sm.loadModel()
-#     print(sm.predictUploadedImage())
+#     sm.fitModel()
+#     sm.saveModel()
 
 
 # if __name__ == "__main__":

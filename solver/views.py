@@ -22,12 +22,10 @@ def result(request):
         image_path = str(Prediction.objects.last().drawed_digit)
         sm = SolverModel()
         sm.createModel()
-        # sm.fitModel()
-        # sm.saveModel()
         sm.loadModel()
         context['digit']=sm.predictUploadedImage(image_path)
         obj = Prediction.objects.last()
-        obj.predicted_digit = context['digit']
+        obj.prediction = context['digit']
         obj.save()
 
     return render(request, 'solver/result.html', context)
