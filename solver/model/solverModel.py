@@ -33,9 +33,22 @@ class DataProcessing:
         return ((np.asarray(small_image)*-1+255)/255).reshape(1, 28*28)
 
     @staticmethod
-    def plotImage(image: np.ndarray) -> None:
+    def plotImage(image: np.ndarray, title: str = None) -> None:
         fig = plt.figure()
+        plt.title(title)
         plt.imshow(image, cmap='gray')
+        plt.show()
+
+    @staticmethod
+    def plotComparisonImage(image: np.ndarray, image2: np.ndarray, title: str = None, title2: str = None) -> None:
+        fig, axs = plt.subplots(1, 2)
+        #axs[0] = DataProcessing.plotImage(img, "Image Before Compression")
+        #axs[1] = DataProcessing.plotImage(img, "Image Before Compression")
+        #plt.title(title)
+        axs[0].imshow(image, cmap='gray')
+        axs[0].set_title(title)
+        axs[1].imshow(image2, cmap='gray')
+        axs[1].set_title(title2)
         plt.show()
     
 
