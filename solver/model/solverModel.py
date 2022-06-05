@@ -61,6 +61,8 @@ class KNN:
             self = pickle.load(f)
         self.__created = True
         self.__fitted = True
+        return self
+
 
     def saveModel(self) -> None:
         with open(MODEL_PATH, "wb") as f:
@@ -157,8 +159,10 @@ class SolverModel:
 
 
 sm = SolverModel()
-sm.fitModel()
-sm.saveModel()
+#sm.fitModel()
+#sm.saveModel()
 # knn.saveModel()
-# knn.loadModel()
+sm.loadModel()
 # sm.fitModel()
+X_train, y_train, X_test, y_test = DataProcessing.prepareTrainTestSet()
+print(sm.predict([X_test[0]]))
