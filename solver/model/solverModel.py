@@ -158,11 +158,11 @@ class SolverModel:
 
 
 
-sm = SolverModel()
-#sm.fitModel()
-#sm.saveModel()
-# knn.saveModel()
-sm.loadModel()
-# sm.fitModel()
-X_train, y_train, X_test, y_test = DataProcessing.prepareTrainTestSet()
-print(sm.predict([X_test[0]]))
+#sm = SolverModel()
+##sm.fitModel()
+##sm.saveModel()
+## knn.saveModel()
+#sm.loadModel()
+## sm.fitModel()
+#X_train, y_train, X_test, y_test = DataProcessing.prepareTrainTestSet()
+#print(sm.predict([X_test[0]]))
