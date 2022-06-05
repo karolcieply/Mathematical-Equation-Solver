@@ -1,4 +1,5 @@
 import logging
+from tkinter import W
 import numpy as np
 import pickle
 import io
@@ -8,7 +9,6 @@ from sklearn.neighbors import KNeighborsClassifier
 import matplotlib.pyplot as plt
 import pandas as pd
 MODEL_PATH = "solver/model/solverModel.pkl"
-import threading
 logging.basicConfig(level=logging.INFO)
 
 
@@ -77,7 +77,7 @@ class SolverModel:
 
     def createModel(self, k: int = 5, p: int = 2) -> None:
         self.__created = True
-        self.__clf = KNeighborsClassifier(n_neighbors=k, p=p)
+        self.__clf = KNN(k=k, m=p)
         logging.info("Model Created")
 
     def predict(self, data: List[float]) -> str:
@@ -98,25 +98,13 @@ class SolverModel:
         self.__clf.fit(X_train, y_train)
         logging.info("Model fitted")
         self.__fitted = True
-        logging.info(f"Model Score: {self.__clf.score(X_test, y_test)}")
+        #logging.info(f"Model Score: {self.__clf.score(X_test, y_test)}")
 
     def predictUploadedImage(self, imagePath) -> int:
         with open(imagePath, "rb") as f:
             readBytes = f.read()
         img = Image.open(io.BytesIO(readBytes)).convert('L')
         return self.__clf.predict(DataProcessing.compressImage(img))[0]
-
-class myThread (threading.Thread):
-    def __init__(self, threadID, name, counter, knn, test_X, test_y):
-        threading.Thread.__init__(self)
-        self.threadID = threadID
-        self.name = name
-        self.counter = counter
-        self.knn = knn
-        self.test_X = test_X
-        self.test_y = test_y
-    def run(self):
-        self.score = self.knn.score(self.test_X, self.test_y)
 
 
 class KNN:
@@ -132,7 +120,7 @@ class KNN:
         self.df = {i: v for i, v in enumerate(df)}
         self.label = {i: v for i, v in enumerate(label)}
 
-    def predict(self, points: pd.DataFrame) -> str:
+    def predict(self, points: list) -> List[str]:
         output_array = []
         for point in points:
             types = {i: 0 for i in range(10)}
@@ -146,7 +134,7 @@ class KNN:
         return np.array(output_array)
             
     
-    def score(self, test_X: pd.DataFrame, test_y) -> float:
+    def score(self, test_X: list, test_y: list) -> float:
         df = {i: v for i, v in enumerate(test_X)}
         label = {i: v for i, v in enumerate(test_y)}
         good = 0
@@ -157,36 +145,9 @@ class KNN:
                 good += 1
         print(f"{sum/len(test_X)*100}% done: {good/sum*100}%")
         return good/len(test_X)*100
-    
-    def startScoreMultiThreaded(self, X_test, y_test):
-        threads = [myThread(i, f"Thread-{i}", i, self, X_test[i::8], y_test[i::8]) for i in range(8)]
-        for x in threads:
-            x.start()
-        for x in threads:
-            x.join()
-        score = 0
-        for x in threads:
-            score+=x.score
-        return score/8
 
-        
-# def main():
-#     sm = SolverModel()
-#     sm.createModel()
-#     sm.fitModel()
-#     sm.saveModel()
-
-
-# if __name__ == "__main__":
-#     main()
-
-def main():
-    a = np.array([1,2,3,4,5,6,7,8,9,10])
-    b = np.array([1,2,3,4,5,6,7,8,9,10])
-    print(a**2)
-
-if __name__ == "__main__":
-    X_train, y_train, X_test, y_test = DataProcessing.prepareTrainTestSet()
-    knn = KNN(2, 5)
-    knn.fit(X_train, y_train)
-    print(knn.startScoreMultiThreaded(X_test, y_test))
+#sm = SolverModel()
+#X_train, y_train, X_test, y_test = DataProcessing.prepareTrainTestSet()
+#sm.fitModel()
+#print(sm.predict(X_test[0:5]))
+#print(y_test[0:5])
