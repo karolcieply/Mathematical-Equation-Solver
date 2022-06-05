@@ -132,15 +132,19 @@ class KNN:
         self.df = {i: v for i, v in enumerate(df)}
         self.label = {i: v for i, v in enumerate(label)}
 
-    def predict(self, point: pd.DataFrame) -> str:
-        types = {i: 0 for i in range(10)}
-        result = []
-        for sample, sampleLabel in zip(self.df.values(), self.label.values()):
-            result.append([KNN.dst(sample, point, self.m), sampleLabel])
-        result.sort(key=lambda x: x[0])
-        for i in range(self.k):
-            types[result[i][1]] += 1
-        return max(types, key=types.get)
+    def predict(self, points: pd.DataFrame) -> str:
+        output_array = []
+        for point in points:
+            types = {i: 0 for i in range(10)}
+            result = []
+            for sample, sampleLabel in zip(self.df.values(), self.label.values()):
+                result.append([KNN.dst(sample, point, self.m), sampleLabel])
+            result.sort(key=lambda x: x[0])
+            for i in range(self.k):
+                types[result[i][1]] += 1
+            output_array.append(max(types, key=types.get))
+        return np.array(output_array)
+            
     
     def score(self, test_X: pd.DataFrame, test_y) -> float:
         df = {i: v for i, v in enumerate(test_X)}
