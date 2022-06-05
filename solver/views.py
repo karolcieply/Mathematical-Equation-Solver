@@ -21,7 +21,7 @@ def result(request):
     if request.method == 'GET':
         image_path = str(Prediction.objects.last().drawed_digit)
         sm = SolverModel()
-        sm.createModel()
+        # sm.createModel()
         sm.loadModel()
         context['digit']=sm.predictUploadedImage(image_path)
         obj = Prediction.objects.last()

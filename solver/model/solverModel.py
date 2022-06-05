@@ -51,26 +51,73 @@ class DataProcessing:
         axs[1].imshow(image2, cmap='gray')
         axs[1].set_title(title2)
         plt.show()
+class KNN:
+    def __init__(self, k: int, m: int):
+        self.k = k
+        self.m = m
+
+    def loadModel(self) -> None:
+        with open(MODEL_PATH, "rb") as f:
+            self = pickle.load(f)
+        self.__created = True
+        self.__fitted = True
+
+    def saveModel(self) -> None:
+        with open(MODEL_PATH, "wb") as f:
+            pickle.dump(self, f)
+        logging.info(f"Model Saved: {MODEL_PATH}")
+
+
+    @staticmethod
+    def dst(x: np.array, y: np.array, m: int) -> float:
+        return (np.abs(x-y)**m).sum()**(1/m)
+
+    def fit(self, df: pd.DataFrame, label: list):
+        self.df = {i: v for i, v in enumerate(df)}
+        self.label = {i: v for i, v in enumerate(label)}
+
+    def predict(self, points: list) -> List[str]:
+        output_array = []
+        for point in points:
+            types = {i: 0 for i in range(10)}
+            result = []
+            for sample, sampleLabel in zip(self.df.values(), self.label.values()):
+                result.append([KNN.dst(sample, point, self.m), sampleLabel])
+            result.sort(key=lambda x: x[0])
+            for i in range(self.k):
+                types[result[i][1]] += 1
+            output_array.append(max(types, key=types.get))
+        return np.array(output_array)
+            
     
+    def score(self, test_X: list, test_y: list) -> float:
+        df = {i: v for i, v in enumerate(test_X)}
+        label = {i: v for i, v in enumerate(test_y)}
+        good = 0
+        sum = 0
+        for sample, sampleLabel in zip(df.values(), label.values()):
+            sum += 1
+            if (x := self.predict(sample)) == sampleLabel:
+                good += 1
+        print(f"{sum/len(test_X)*100}% done: {good/sum*100}%")
+        return good/len(test_X)*100
 
 class SolverModel:
     __fitted: bool = False
     __created: bool = False
-    __clf: KNeighborsClassifier = None
+    __clf: KNN = None
 
     def __init__(self, k: int = 5, p: int = 2) -> None:
         self.createModel(k, p)
 
     def loadModel(self) -> None:
-        with open(MODEL_PATH, "rb") as f:
-            self.__clf = pickle.load(f)
-        self.__created = True
-        self.__fitted = True
+        if self.__created:
+            self.__clf = self.__clf.loadModel()
+            self.__fitted = True
 
     def saveModel(self) -> None:
         if self.__created and self.__fitted:
-            with open(MODEL_PATH, "wb") as f:
-                pickle.dump(self.__clf, f)
+            self.__clf.saveModel()
             logging.info(f"Model Saved: {MODEL_PATH}")
         else:
             raise Exception("Model not created or not fitted")
@@ -107,47 +154,11 @@ class SolverModel:
         return self.__clf.predict(DataProcessing.compressImage(img))[0]
 
 
-class KNN:
-    def __init__(self, k: int, m: int):
-        self.k = k
-        self.m = m
 
-    @staticmethod
-    def dst(x: np.array, y: np.array, m: int) -> float:
-        return (np.abs(x-y)**m).sum()**(1/m)
 
-    def fit(self, df: pd.DataFrame, label: list):
-        self.df = {i: v for i, v in enumerate(df)}
-        self.label = {i: v for i, v in enumerate(label)}
-
-    def predict(self, points: list) -> List[str]:
-        output_array = []
-        for point in points:
-            types = {i: 0 for i in range(10)}
-            result = []
-            for sample, sampleLabel in zip(self.df.values(), self.label.values()):
-                result.append([KNN.dst(sample, point, self.m), sampleLabel])
-            result.sort(key=lambda x: x[0])
-            for i in range(self.k):
-                types[result[i][1]] += 1
-            output_array.append(max(types, key=types.get))
-        return np.array(output_array)
-            
-    
-    def score(self, test_X: list, test_y: list) -> float:
-        df = {i: v for i, v in enumerate(test_X)}
-        label = {i: v for i, v in enumerate(test_y)}
-        good = 0
-        sum = 0
-        for sample, sampleLabel in zip(df.values(), label.values()):
-            sum += 1
-            if (x := self.predict(sample)) == sampleLabel:
-                good += 1
-        print(f"{sum/len(test_X)*100}% done: {good/sum*100}%")
-        return good/len(test_X)*100
-
-#sm = SolverModel()
-#X_train, y_train, X_test, y_test = DataProcessing.prepareTrainTestSet()
-#sm.fitModel()
-#print(sm.predict(X_test[0:5]))
-#print(y_test[0:5])
+sm = SolverModel()
+sm.fitModel()
+sm.saveModel()
+# knn.saveModel()
+# knn.loadModel()
+# sm.fitModel()
