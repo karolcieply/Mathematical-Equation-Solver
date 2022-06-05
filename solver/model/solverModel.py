@@ -8,6 +8,7 @@ from sklearn.neighbors import KNeighborsClassifier
 import matplotlib.pyplot as plt
 import pandas as pd
 MODEL_PATH = "solver/model/solverModel.pkl"
+import threading
 logging.basicConfig(level=logging.INFO)
 
 
@@ -105,6 +106,65 @@ class SolverModel:
         img = Image.open(io.BytesIO(readBytes)).convert('L')
         return self.__clf.predict(DataProcessing.compressImage(img))[0]
 
+class myThread (threading.Thread):
+    def __init__(self, threadID, name, counter, knn, test_X, test_y):
+        threading.Thread.__init__(self)
+        self.threadID = threadID
+        self.name = name
+        self.counter = counter
+        self.knn = knn
+        self.test_X = test_X
+        self.test_y = test_y
+    def run(self):
+        self.score = self.knn.score(self.test_X, self.test_y)
+
+
+class KNN:
+    def __init__(self, k: int, m: int):
+        self.k = k
+        self.m = m
+
+    @staticmethod
+    def dst(x: np.array, y: np.array, m: int) -> float:
+        return (np.abs(x-y)**m).sum()**(1/m)
+
+    def fit(self, df: pd.DataFrame, label: list):
+        self.df = {i: v for i, v in enumerate(df)}
+        self.label = {i: v for i, v in enumerate(label)}
+
+    def predict(self, point: pd.DataFrame) -> str:
+        types = {i: 0 for i in range(10)}
+        result = []
+        for sample, sampleLabel in zip(self.df.values(), self.label.values()):
+            result.append([KNN.dst(sample, point, self.m), sampleLabel])
+        result.sort(key=lambda x: x[0])
+        for i in range(self.k):
+            types[result[i][1]] += 1
+        return max(types, key=types.get)
+    
+    def score(self, test_X: pd.DataFrame, test_y) -> float:
+        df = {i: v for i, v in enumerate(test_X)}
+        label = {i: v for i, v in enumerate(test_y)}
+        good = 0
+        sum = 0
+        for sample, sampleLabel in zip(df.values(), label.values()):
+            sum += 1
+            if (x := self.predict(sample)) == sampleLabel:
+                good += 1
+        print(f"{sum/len(test_X)*100}% done: {good/sum*100}%")
+        return good/len(test_X)*100
+    
+    def startScoreMultiThreaded(self, X_test, y_test):
+        threads = [myThread(i, f"Thread-{i}", i, self, X_test[i::8], y_test[i::8]) for i in range(8)]
+        for x in threads:
+            x.start()
+        for x in threads:
+            x.join()
+        score = 0
+        for x in threads:
+            score+=x.score
+        return score/8
+
         
 # def main():
 #     sm = SolverModel()
@@ -115,3 +175,14 @@ class SolverModel:
 
 # if __name__ == "__main__":
 #     main()
+
+def main():
+    a = np.array([1,2,3,4,5,6,7,8,9,10])
+    b = np.array([1,2,3,4,5,6,7,8,9,10])
+    print(a**2)
+
+if __name__ == "__main__":
+    X_train, y_train, X_test, y_test = DataProcessing.prepareTrainTestSet()
+    knn = KNN(2, 5)
+    knn.fit(X_train, y_train)
+    print(knn.startScoreMultiThreaded(X_test, y_test))
